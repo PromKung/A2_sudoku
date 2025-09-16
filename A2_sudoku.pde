@@ -3,8 +3,8 @@ def setup():
     background(255)  # white background
     stroke(0)        # black lines
 
-    margin = 5                  # space from edges
-    gridSize = 510 - 2 * margin # drawing area
+    space = 5                  # space from edges
+    gridSize = 510 - 2 * space # drawing area
     cellSize = gridSize / 9.0
 
     # Draw vertical lines
@@ -14,8 +14,8 @@ def setup():
             strokeWeight(3)  # thicker line for 3x3 blocks
         else:
             strokeWeight(1)  # normal line
-        x = margin + i * cellSize
-        line(x, margin, x, height - margin)
+        x = space + i * cellSize
+        line(x, space, x, height - space)
         i += 1
 
     # Draw horizontal lines
@@ -25,8 +25,8 @@ def setup():
             strokeWeight(3)
         else:
             strokeWeight(1)
-        y = margin + i * cellSize
-        line(margin, y, width - margin, y)
+        y = space + i * cellSize
+        line(space, y, width - space, y)
         i += 1
 
 def draw():
