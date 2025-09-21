@@ -1,15 +1,15 @@
 def setup():
-    size(510, 610)
-    background(255)  # white background
-    stroke(0)        # black lines
+    size(510, 610)  #Leave 100 y axis for number boxes
+    background(255)
+    stroke(0)
 
-def drawGrid():
+def drawGrid():  #Draw grid of sudoku
     space = 5
     gridSide = 510
     gridSize = gridSide - 2 * space
     cellSize = gridSize / 9.0
 
-    # Draw vertical lines
+    #Vertical
     i = 0
     while i <= 9:
         if i % 3 == 0:
@@ -18,9 +18,9 @@ def drawGrid():
             strokeWeight(1)
         x = space + i * cellSize
         line(x, space, x, gridSide - space)
-        i += 1
+        i = i + 1
 
-    # Draw horizontal lines
+    #Horizontal
     i = 0
     while i <= 9:
         if i % 3 == 0:
@@ -29,8 +29,24 @@ def drawGrid():
             strokeWeight(1)
         y = space + i * cellSize
         line(space, y, gridSide - space, y)
-        i += 1
+        i = i + 1
+
+def drawNumberBoxes():  #Draw number boxes under the grid
+    gap = 5
+    boxY = 510 + gap
+    boxHeight = height - 510 - 2 * gap
+    totalGapWidth = gap * (9 - 1)
+    availableWidth = width - 2 * gap - totalGapWidth
+    boxWidth = availableWidth / 9
+
+    strokeWeight(3)
+    i = 0
+    while i < 9:
+        x = gap + i * (boxWidth + gap)
+        rect(x, boxY, boxWidth, boxHeight)
+        i = i + 1
 
 def draw():
-    background(255)  # clear each frame
+    background(255)
     drawGrid()
+    drawNumberBoxes()
