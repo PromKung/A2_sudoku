@@ -2,6 +2,8 @@ def setup():
     size(510, 610)  #Leave 100 y axis for number boxes
     background(255)
     stroke(0)
+    textAlign(CENTER, CENTER)  # center text in box
+    textSize(20)  # adjust font size
 
 def drawGrid():  #Draw grid of sudoku
     space = 5
@@ -42,8 +44,15 @@ def drawNumberBoxes():  #Draw number boxes under the grid
     strokeWeight(3)
     i = 0
     while i < 9:
-        x = gap + i * (boxWidth + gap)
-        rect(x, boxY, boxWidth, boxHeight)
+        boxX = gap + i * (boxWidth + gap)
+        noFill()
+        rect(boxX, boxY, boxWidth, boxHeight)
+        
+        #Draw number
+        fill(0)
+        textSize(int(boxHeight * 0.65))
+        text(str(i + 1), boxX + boxWidth / 2, boxY + boxHeight / 2)  #Box + Wid/Hei /2 = middle of box
+        
         i = i + 1
 
 def draw():
