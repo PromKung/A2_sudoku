@@ -1,21 +1,23 @@
 def setup():
-    size(510, 510)
+    size(510, 610)
     background(255)  # white background
     stroke(0)        # black lines
 
-    space = 5                  # space from edges
-    gridSize = 510 - 2 * space # drawing area
+def drawGrid():
+    space = 5
+    gridSide = 510
+    gridSize = gridSide - 2 * space
     cellSize = gridSize / 9.0
 
     # Draw vertical lines
     i = 0
     while i <= 9:
         if i % 3 == 0:
-            strokeWeight(3)  # thicker line for 3x3 blocks
+            strokeWeight(3)
         else:
-            strokeWeight(1)  # normal line
+            strokeWeight(1)
         x = space + i * cellSize
-        line(x, space, x, height - space)
+        line(x, space, x, gridSide - space)
         i += 1
 
     # Draw horizontal lines
@@ -26,8 +28,9 @@ def setup():
         else:
             strokeWeight(1)
         y = space + i * cellSize
-        line(space, y, width - space, y)
+        line(space, y, gridSide - space, y)
         i += 1
 
 def draw():
-    pass  # empty because the grid is static
+    background(255)  # clear each frame
+    drawGrid()
