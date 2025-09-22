@@ -35,6 +35,7 @@ def drawGrid():  #Draw grid of sudoku
 
 def drawNumberBoxes():  #Draw number boxes under the grid
     gap = 5
+    boxX = gap + i * (boxWidth + gap)
     boxY = 510 + gap
     boxHeight = height - 510 - 2 * gap
     totalGapWidth = gap * (9 - 1)
@@ -44,7 +45,6 @@ def drawNumberBoxes():  #Draw number boxes under the grid
     strokeWeight(3)
     i = 0
     while i < 9:
-        boxX = gap + i * (boxWidth + gap)
         noFill()
         rect(boxX, boxY, boxWidth, boxHeight)
         
