@@ -1,46 +1,71 @@
+# --- Global variables ---
 selectedRow = -1
 selectedCol = -1
 selectedNumber = -1
 gameWon = False
 
-# Sudoku puzzle: '0' means empty
-board = [
-    ['5','3','0','0','7','0','0','0','0'],
-    ['6','0','0','1','9','5','0','0','0'],
-    ['0','9','8','0','0','0','0','6','0'],
-    ['8','0','0','0','6','0','0','0','3'],
-    ['4','0','0','8','0','3','0','0','1'],
-    ['7','0','0','0','2','0','0','0','6'],
-    ['0','6','0','0','0','0','2','8','0'],
-    ['0','0','0','4','1','9','0','0','5'],
-    ['0','0','0','0','8','0','0','7','9']
-]
+board = []      # Sudoku numbers as strings
+fixed = []      # True if number is from the puzzle
 
-# Track fixed cells (original numbers)
-fixed = []
-row = 0
-while row < 9:
-    newRow = []
-    col = 0
-    while col < 9:
-        if board[row][col] != '0':
-            newRow.append(True)
-        else:
-            newRow.append(False)
-        col += 1
-    fixed.append(newRow)
-    row += 1
-
+# ---------------- Setup ----------------
 def setup():
+    global board, fixed
     size(510, 610)
     background(255)
+
+    # Attempt to load puzzle from file
+    lines = []
+    try:
+        lines = loadStrings("sudoku_boards.txt")
+    except:
+        print("Could not load sudoku_boards.txt, using fallback puzzle.")
+
+    # If file missing or empty, use a default puzzle
+    if not lines or len(lines) < 9:
+        print("File missing or incomplete. Using fallback puzzle.")
+        lines = [
+            "530070000",
+            "600195000",
+            "098000060",
+            "800060003",
+            "400803001",
+            "700020006",
+            "060000280",
+            "000419005",
+            "000080079"
+        ]
+
+    # Build board and fixed arrays
+    board = []
+    fixed = []
+
+    i = 0
+    while i < 9:
+        row_nums = []
+        row_fixed = []
+        j = 0
+        while j < 9:
+            ch = lines[i][j] if j < len(lines[i]) else '0'
+            row_nums.append(ch)
+            row_fixed.append(ch != '0')
+            j += 1
+        board.append(row_nums)
+        fixed.append(row_fixed)
+        i += 1
+
     stroke(0)
     textAlign(CENTER, CENTER)
     textSize(20)
 
+    print("Board loaded:")
+    for r in board:
+        print(r)
+
+# ---------------- Draw ----------------
 def draw():
     global gameWon
     background(255)
+
     if not gameWon:
         highlightRelatedCells()
         highlightCell()
@@ -48,109 +73,35 @@ def draw():
         drawNumbers()
         drawNumberBoxes()
     else:
-        fill(0, 0, 0)
+        fill(0)
         textSize(50)
         text("Congratulations!\n YOU WIN", width/2, height/2)
-        noLoop()  # stop the draw loop after winning
+        noLoop()  # stop the draw loop
 
+# ---------------- Grid ----------------
 def drawGrid():
     space = 5
     gridSide = 510
     gridSize = gridSide - 2 * space
     cellSize = gridSize / 9.0
 
-    #Vertical lines
+    # Vertical lines
     i = 0
     while i <= 9:
-        if i % 3 == 0:
-            strokeWeight(3)
-        else:
-            strokeWeight(1)
+        strokeWeight(3 if i % 3 == 0 else 1)
         x = space + i * cellSize
         line(x, space, x, gridSide - space)
         i += 1
 
-    #Horizontal lines
+    # Horizontal lines
     i = 0
     while i <= 9:
-        if i % 3 == 0:
-            strokeWeight(3)
-        else:
-            strokeWeight(1)
+        strokeWeight(3 if i % 3 == 0 else 1)
         y = space + i * cellSize
         line(space, y, gridSide - space, y)
         i += 1
 
-def drawNumberBoxes():
-    gap = 5
-    totalGapWidth = gap * (9 - 1)
-    availableWidth = width - 2 * gap - totalGapWidth
-    boxWidth = availableWidth / 9
-    boxHeight = height - 510 - 2 * gap
-    boxY = 510 + gap
-
-    i = 0
-    while i < 9:
-        boxX = gap + i * (boxWidth + gap)
-        noFill()
-        strokeWeight(2)
-        rect(boxX, boxY, boxWidth, boxHeight)
-
-        fill(0)
-        textSize(int(boxHeight * 0.65))
-        text(str(i + 1), boxX + boxWidth / 2, boxY + boxHeight / 2)
-        fill(255)
-        i += 1
-
-def highlightRelatedCells():
-    if selectedRow != -1 and selectedCol != -1:
-        space = 5
-        gridSide = 510
-        gridSize = gridSide - 2 * space
-        cellSize = gridSize / 9.0
-
-        fill(200, 220, 255)
-        noStroke()
-
-        #Row
-        col = 0
-        while col < 9:
-            rect(space + col * cellSize, space + selectedRow * cellSize, cellSize, cellSize)
-            col += 1
-
-        #Column
-        row = 0
-        while row < 9:
-            rect(space + selectedCol * cellSize, space + row * cellSize, cellSize, cellSize)
-            row += 1
-
-        #3x3 block
-        startRow = (selectedRow // 3) * 3
-        startCol = (selectedCol // 3) * 3
-        r = 0
-        while r < 3:
-            c = 0
-            while c < 3:
-                rect(space + (startCol + c) * cellSize, space + (startRow + r) * cellSize, cellSize, cellSize)
-                c += 1
-            r += 1
-
-        noFill()
-        stroke(0)
-
-def highlightCell():
-    if selectedRow != -1 and selectedCol != -1:
-        space = 5
-        gridSide = 510
-        gridSize = gridSide - 2 * space
-        cellSize = gridSize / 9.0
-
-        fill(150, 200, 255)
-        noStroke()
-        rect(space + selectedCol * cellSize, space + selectedRow * cellSize, cellSize, cellSize)
-        noFill()
-        stroke(0)
-
+# ---------------- Numbers ----------------
 def drawNumbers():
     space = 5
     gridSide = 510
@@ -163,40 +114,145 @@ def drawNumbers():
         while col < 9:
             num = board[row][col]
             if num != '0':
-                if fixed[row][col]:
-                    fill(0)
-                else:
-                    fill(70, 130, 255)
+                fill(0) if fixed[row][col] else fill(70, 130, 255)
                 textSize(int(cellSize * 0.7))
-                text(str(num),
-                     space + col * cellSize + cellSize / 2,
-                     space + row * cellSize + cellSize / 2)
+                text(num, space + col*cellSize + cellSize/2,
+                          space + row*cellSize + cellSize/2)
             col += 1
         row += 1
     noFill()
     textSize(20)
 
+# ---------------- Number boxes ----------------
+def drawNumberBoxes():
+    gap = 5
+    totalGapWidth = gap * (9 - 1)
+    availableWidth = width - 2*gap - totalGapWidth
+    boxWidth = availableWidth / 9
+    boxHeight = height - 510 - 2*gap
+    boxY = 510 + gap
+
+    i = 0
+    while i < 9:
+        boxX = gap + i * (boxWidth + gap)
+        noFill()
+        strokeWeight(2)
+        rect(boxX, boxY, boxWidth, boxHeight)
+
+        fill(0)
+        textSize(int(boxHeight*0.65))
+        text(str(i+1), boxX + boxWidth/2, boxY + boxHeight/2)
+        fill(255)
+        i += 1
+
+# ---------------- Cell highlights ----------------
+def highlightRelatedCells():
+    if selectedRow != -1 and selectedCol != -1:
+        space = 5
+        gridSide = 510
+        gridSize = gridSide - 2*space
+        cellSize = gridSize / 9.0
+
+        fill(200, 220, 255)
+        noStroke()
+
+        # Row
+        col = 0
+        while col < 9:
+            rect(space + col*cellSize, space + selectedRow*cellSize, cellSize, cellSize)
+            col += 1
+
+        # Column
+        row = 0
+        while row < 9:
+            rect(space + selectedCol*cellSize, space + row*cellSize, cellSize, cellSize)
+            row += 1
+
+        # 3x3 block
+        startRow = (selectedRow // 3) * 3
+        startCol = (selectedCol // 3) * 3
+        r = 0
+        while r < 3:
+            c = 0
+            while c < 3:
+                rect(space + (startCol+c)*cellSize, space + (startRow+r)*cellSize, cellSize, cellSize)
+                c += 1
+            r += 1
+
+        noFill()
+        stroke(0)
+
+def highlightCell():
+    if selectedRow != -1 and selectedCol != -1:
+        space = 5
+        gridSide = 510
+        gridSize = gridSide - 2*space
+        cellSize = gridSize / 9.0
+
+        fill(150, 200, 255)
+        noStroke()
+        rect(space + selectedCol*cellSize, space + selectedRow*cellSize, cellSize, cellSize)
+        noFill()
+        stroke(0)
+
+# ---------------- Mouse ----------------
+def mousePressed():
+    global selectedRow, selectedCol, selectedNumber
+    if gameWon:
+        return
+
+    space = 5
+    gridSide = 510
+    gridSize = gridSide - 2*space
+    cellSize = gridSize / 9.0
+
+    # Sudoku grid
+    if space <= mouseX <= gridSide-space and space <= mouseY <= gridSide-space:
+        selectedCol = int((mouseX-space)/cellSize)
+        selectedRow = int((mouseY-space)/cellSize)
+        return
+
+    # Number boxes
+    gap = 5
+    totalGapWidth = gap*(9-1)
+    availableWidth = width - 2*gap - totalGapWidth
+    boxWidth = availableWidth / 9
+    boxHeight = height - 510 - 2*gap
+    boxY = 510 + gap
+
+    if boxY <= mouseY <= boxY + boxHeight:
+        i = 0
+        while i < 9:
+            boxX = gap + i*(boxWidth + gap)
+            if boxX <= mouseX <= boxX + boxWidth:
+                selectedNumber = i+1
+                if selectedRow != -1 and selectedCol != -1:
+                    placeNumber(selectedRow, selectedCol, selectedNumber)
+                break
+            i += 1
+
+# ---------------- Sudoku logic ----------------
 def isValid(row, col, number):
-    #Row
+    # Row
     c = 0
     while c < 9:
         if board[row][c] == str(number):
             return False
         c += 1
-    #Column
+    # Column
     r = 0
     while r < 9:
         if board[r][col] == str(number):
             return False
         r += 1
-    #3x3 block
-    startRow = (row // 3) * 3
-    startCol = (col // 3) * 3
+    # Block
+    startRow = (row//3)*3
+    startCol = (col//3)*3
     r = 0
     while r < 3:
         c = 0
         while c < 3:
-            if board[startRow + r][startCol + c] == str(number):
+            if board[startRow+r][startCol+c] == str(number):
                 return False
             c += 1
         r += 1
@@ -218,45 +274,8 @@ def checkWinSimple():
     while row < 9:
         col = 0
         while col < 9:
-            if board[row][col] == '0':  # empty cell
+            if board[row][col] == '0':
                 return False
             col += 1
         row += 1
     return True
-
-def mousePressed():
-    global selectedRow, selectedCol, selectedNumber
-    if gameWon:
-        return
-
-    space = 5
-    gridSide = 510
-    gridSize = gridSide - 2 * space
-    cellSize = gridSize / 9.0
-
-    #Sudoku grid
-    if space <= mouseX <= gridSide - space and space <= mouseY <= gridSide - space:
-        selectedCol = int((mouseX - space) / cellSize)
-        selectedRow = int((mouseY - space) / cellSize)
-        print("Grid cell selected:", selectedRow, selectedCol)
-        return
-
-    #Number boxes
-    gap = 5
-    totalGapWidth = gap * (9 - 1)
-    availableWidth = width - 2 * gap - totalGapWidth
-    boxWidth = availableWidth / 9
-    boxHeight = height - 510 - 2 * gap
-    boxY = 510 + gap
-
-    if boxY <= mouseY <= boxY + boxHeight:
-        i = 0
-        while i < 9:
-            boxX = gap + i * (boxWidth + gap)
-            if boxX <= mouseX <= boxX + boxWidth:
-                selectedNumber = i + 1
-                print("Number selected:", selectedNumber)
-                if selectedRow != -1 and selectedCol != -1:
-                    placeNumber(selectedRow, selectedCol, selectedNumber)
-                break
-            i += 1
