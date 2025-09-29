@@ -2,21 +2,32 @@ selectedRow = -1
 selectedCol = -1
 selectedNumber = -1
 
-# Initialize empty 9x9 grid using while loops
-grid = []
+# Static Sudoku board (original puzzle)
+board = [
+    ['5','3','0','0','7','0','0','0','0'],
+    ['6','0','0','1','9','5','0','0','0'],
+    ['0','9','8','0','0','0','0','6','0'],
+    ['8','0','0','0','6','0','0','0','3'],
+    ['4','0','0','8','0','3','0','0','1'],
+    ['7','0','0','0','2','0','0','0','6'],
+    ['0','6','0','0','0','0','2','8','0'],
+    ['0','0','0','4','1','9','0','0','5'],
+    ['0','0','0','0','8','0','0','7','9']
+]
 
+# Track which cells are original (cannot be changed)
+fixed = []
 row = 0
 while row < 9:
     newRow = []
     col = 0
     while col < 9:
-        newRow.append(0)  # 0 means empty
+        if board[row][col] != '0':
+            newRow.append(True)   # original number
+        else:
+            newRow.append(False)  # empty cell
         col += 1
-    grid.append(newRow)
-    
-    # Optional: mark 3-row blocks in code for clarity
-    if (row + 1) % 3 == 0:
-        pass  # End of a 3-row block
+    fixed.append(newRow)
     row += 1
 
 def setup():
@@ -28,6 +39,7 @@ def setup():
 
 def draw():
     background(255)
+    highlightRelatedCells()
     highlightCell()
     drawGrid()
     drawNumbers()
@@ -82,6 +94,43 @@ def drawNumberBoxes():
         fill(255)  # reset fill
         i += 1
 
+def highlightRelatedCells():
+    if selectedRow != -1 and selectedCol != -1:
+        space = 5
+        gridSide = 510
+        gridSize = gridSide - 2 * space
+        cellSize = gridSize / 9.0
+
+        fill(200, 220, 255)  # light blue for all related cells
+        noStroke()
+
+        # Row
+        col = 0
+        while col < 9:
+            rect(space + col * cellSize, space + selectedRow * cellSize, cellSize, cellSize)
+            col += 1
+
+        # Column
+        row = 0
+        while row < 9:
+            rect(space + selectedCol * cellSize, space + row * cellSize, cellSize, cellSize)
+            row += 1
+
+        # 3x3 block
+        startRow = (selectedRow // 3) * 3
+        startCol = (selectedCol // 3) * 3
+        r = 0
+        while r < 3:
+            c = 0
+            while c < 3:
+                rect(space + (startCol + c) * cellSize, space + (startRow + r) * cellSize, cellSize, cellSize)
+                c += 1
+            r += 1
+
+        # Reset fill
+        noFill()
+        stroke(0)
+
 def highlightCell():
     if selectedRow != -1 and selectedCol != -1:
         space = 5
@@ -89,7 +138,7 @@ def highlightCell():
         gridSize = gridSide - 2 * space
         cellSize = gridSize / 9.0
 
-        fill(200, 220, 255)   # light blue highlight
+        fill(150, 200, 255)   # darker blue for selected cell
         noStroke()
         rect(space + selectedCol * cellSize, space + selectedRow * cellSize, cellSize, cellSize)
         noFill()
@@ -105,9 +154,12 @@ def drawNumbers():
     while row < 9:
         col = 0
         while col < 9:
-            num = grid[row][col]
-            if num != 0:
-                fill(0)
+            num = board[row][col]
+            if num != '0':
+                if fixed[row][col]:
+                    fill(0)        # original number black
+                else:
+                    fill(70, 130, 255)  # user number royal blue
                 textSize(int(cellSize * 0.7))
                 text(str(num),
                      space + col * cellSize + cellSize / 2,
@@ -119,7 +171,8 @@ def drawNumbers():
 
 def placeNumber(row, col, number):
     if 0 <= row < 9 and 0 <= col < 9:
-        grid[row][col] = number
+        if not fixed[row][col]:
+            board[row][col] = str(number)
 
 def mousePressed():
     global selectedRow, selectedCol, selectedNumber
@@ -128,14 +181,14 @@ def mousePressed():
     gridSize = gridSide - 2 * space
     cellSize = gridSize / 9.0
 
-    # Check click inside Sudoku grid
+    # Click inside Sudoku grid
     if space <= mouseX <= gridSide - space and space <= mouseY <= gridSide - space:
         selectedCol = int((mouseX - space) / cellSize)
         selectedRow = int((mouseY - space) / cellSize)
         print("Grid cell selected:", selectedRow, selectedCol)
         return
 
-    # Check click on number boxes
+    # Click on number boxes
     gap = 5
     totalGapWidth = gap * (9 - 1)
     availableWidth = width - 2 * gap - totalGapWidth
@@ -150,7 +203,6 @@ def mousePressed():
             if boxX <= mouseX <= boxX + boxWidth:
                 selectedNumber = i + 1
                 print("Number selected:", selectedNumber)
-                # Place number in selected cell
                 if selectedRow != -1 and selectedCol != -1:
                     placeNumber(selectedRow, selectedCol, selectedNumber)
                 break
