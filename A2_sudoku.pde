@@ -1,8 +1,9 @@
 selectedRow = -1
 selectedCol = -1
 selectedNumber = -1
+gameWon = False
 
-# Static Sudoku board (original puzzle)
+# Sudoku puzzle: '0' means empty
 board = [
     ['5','3','0','0','7','0','0','0','0'],
     ['6','0','0','1','9','5','0','0','0'],
@@ -15,7 +16,7 @@ board = [
     ['0','0','0','0','8','0','0','7','9']
 ]
 
-# Track which cells are original (cannot be changed)
+# Track fixed cells (original numbers)
 fixed = []
 row = 0
 while row < 9:
@@ -23,9 +24,9 @@ while row < 9:
     col = 0
     while col < 9:
         if board[row][col] != '0':
-            newRow.append(True)   # original number
+            newRow.append(True)
         else:
-            newRow.append(False)  # empty cell
+            newRow.append(False)
         col += 1
     fixed.append(newRow)
     row += 1
@@ -38,12 +39,19 @@ def setup():
     textSize(20)
 
 def draw():
+    global gameWon
     background(255)
-    highlightRelatedCells()
-    highlightCell()
-    drawGrid()
-    drawNumbers()
-    drawNumberBoxes()
+    if not gameWon:
+        highlightRelatedCells()
+        highlightCell()
+        drawGrid()
+        drawNumbers()
+        drawNumberBoxes()
+    else:
+        fill(0, 150, 0)
+        textSize(50)
+        text("Congratulations!\n YOU WIN", width/2, height/2)
+        noLoop()  # stop the draw loop after winning
 
 def drawGrid():
     space = 5
@@ -51,7 +59,7 @@ def drawGrid():
     gridSize = gridSide - 2 * space
     cellSize = gridSize / 9.0
 
-    # Vertical lines
+    #Vertical lines
     i = 0
     while i <= 9:
         if i % 3 == 0:
@@ -62,7 +70,7 @@ def drawGrid():
         line(x, space, x, gridSide - space)
         i += 1
 
-    # Horizontal lines
+    #Horizontal lines
     i = 0
     while i <= 9:
         if i % 3 == 0:
@@ -91,7 +99,7 @@ def drawNumberBoxes():
         fill(0)
         textSize(int(boxHeight * 0.65))
         text(str(i + 1), boxX + boxWidth / 2, boxY + boxHeight / 2)
-        fill(255)  # reset fill
+        fill(255)
         i += 1
 
 def highlightRelatedCells():
@@ -101,22 +109,22 @@ def highlightRelatedCells():
         gridSize = gridSide - 2 * space
         cellSize = gridSize / 9.0
 
-        fill(200, 220, 255)  # light blue for all related cells
+        fill(200, 220, 255)
         noStroke()
 
-        # Row
+        #Row
         col = 0
         while col < 9:
             rect(space + col * cellSize, space + selectedRow * cellSize, cellSize, cellSize)
             col += 1
 
-        # Column
+        #Column
         row = 0
         while row < 9:
             rect(space + selectedCol * cellSize, space + row * cellSize, cellSize, cellSize)
             row += 1
 
-        # 3x3 block
+        #3x3 block
         startRow = (selectedRow // 3) * 3
         startCol = (selectedCol // 3) * 3
         r = 0
@@ -127,7 +135,6 @@ def highlightRelatedCells():
                 c += 1
             r += 1
 
-        # Reset fill
         noFill()
         stroke(0)
 
@@ -138,7 +145,7 @@ def highlightCell():
         gridSize = gridSide - 2 * space
         cellSize = gridSize / 9.0
 
-        fill(150, 200, 255)   # darker blue for selected cell
+        fill(150, 200, 255)
         noStroke()
         rect(space + selectedCol * cellSize, space + selectedRow * cellSize, cellSize, cellSize)
         noFill()
@@ -157,9 +164,9 @@ def drawNumbers():
             num = board[row][col]
             if num != '0':
                 if fixed[row][col]:
-                    fill(0)        # original number black
+                    fill(0)
                 else:
-                    fill(70, 130, 255)  # user number royal blue
+                    fill(70, 130, 255)
                 textSize(int(cellSize * 0.7))
                 text(str(num),
                      space + col * cellSize + cellSize / 2,
@@ -169,26 +176,72 @@ def drawNumbers():
     noFill()
     textSize(20)
 
+def isValid(row, col, number):
+    #Row
+    c = 0
+    while c < 9:
+        if board[row][c] == str(number):
+            return False
+        c += 1
+    #Column
+    r = 0
+    while r < 9:
+        if board[r][col] == str(number):
+            return False
+        r += 1
+    #3x3 block
+    startRow = (row // 3) * 3
+    startCol = (col // 3) * 3
+    r = 0
+    while r < 3:
+        c = 0
+        while c < 3:
+            if board[startRow + r][startCol + c] == str(number):
+                return False
+            c += 1
+        r += 1
+    return True
+
 def placeNumber(row, col, number):
+    global gameWon
     if 0 <= row < 9 and 0 <= col < 9:
         if not fixed[row][col]:
-            board[row][col] = str(number)
+            if isValid(row, col, number):
+                board[row][col] = str(number)
+                if checkWinSimple():
+                    gameWon = True
+            else:
+                print("Invalid placement!")
+
+def checkWinSimple():
+    row = 0
+    while row < 9:
+        col = 0
+        while col < 9:
+            if board[row][col] == '0':  # empty cell
+                return False
+            col += 1
+        row += 1
+    return True
 
 def mousePressed():
     global selectedRow, selectedCol, selectedNumber
+    if gameWon:
+        return
+
     space = 5
     gridSide = 510
     gridSize = gridSide - 2 * space
     cellSize = gridSize / 9.0
 
-    # Click inside Sudoku grid
+    #Sudoku grid
     if space <= mouseX <= gridSide - space and space <= mouseY <= gridSide - space:
         selectedCol = int((mouseX - space) / cellSize)
         selectedRow = int((mouseY - space) / cellSize)
         print("Grid cell selected:", selectedRow, selectedCol)
         return
 
-    # Click on number boxes
+    #Number boxes
     gap = 5
     totalGapWidth = gap * (9 - 1)
     availableWidth = width - 2 * gap - totalGapWidth
