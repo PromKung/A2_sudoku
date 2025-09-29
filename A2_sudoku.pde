@@ -48,7 +48,7 @@ def draw():
         drawNumbers()
         drawNumberBoxes()
     else:
-        fill(0, 150, 0)
+        fill(0, 0, 0)
         textSize(50)
         text("Congratulations!\n YOU WIN", width/2, height/2)
         noLoop()  # stop the draw loop after winning
