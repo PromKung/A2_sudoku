@@ -1,11 +1,10 @@
-# --- Global variables ---
 selectedRow = -1
 selectedCol = -1
 selectedNumber = -1
 gameWon = False
 
-board = []      # Sudoku numbers as strings
-fixed = []      # True if number is from the puzzle
+board = [] #Sudoku numbers as strings
+fixed = [] #True if number is from the puzzle
 
 # ---------------- Setup ----------------
 def setup():
@@ -13,45 +12,37 @@ def setup():
     size(510, 610)
     background(255)
 
-    # Attempt to load puzzle from file
-    lines = []
+    boards = []
     try:
         lines = loadStrings("sudoku_boards.txt")
+        current_board = []
+        for line in lines:
+            line = line.strip()
+            if line == "":
+                if current_board:
+                    boards.append(current_board)
+                    current_board = []
+            else:
+                current_board.append(line)
+        if current_board:
+            boards.append(current_board)
     except:
-        print("Could not load sudoku_boards.txt, using fallback puzzle.")
+        print("Could not load sudoku_boards.txt. Using fallback board.")
+        boards = [["530070000","600195000","098000060","800060003","400803001","700020006","060000280","000419005","000080079"]]
 
-    # If file missing or empty, use a default puzzle
-    if not lines or len(lines) < 9:
-        print("File missing or incomplete. Using fallback puzzle.")
-        lines = [
-            "530070000",
-            "600195000",
-            "098000060",
-            "800060003",
-            "400803001",
-            "700020006",
-            "060000280",
-            "000419005",
-            "000080079"
-        ]
+    import random
+    chosen = random.choice(boards)
 
-    # Build board and fixed arrays
     board = []
     fixed = []
-
-    i = 0
-    while i < 9:
+    for row_line in chosen:
         row_nums = []
         row_fixed = []
-        j = 0
-        while j < 9:
-            ch = lines[i][j] if j < len(lines[i]) else '0'
+        for ch in row_line:
             row_nums.append(ch)
             row_fixed.append(ch != '0')
-            j += 1
         board.append(row_nums)
         fixed.append(row_fixed)
-        i += 1
 
     stroke(0)
     textAlign(CENTER, CENTER)
@@ -76,7 +67,7 @@ def draw():
         fill(0)
         textSize(50)
         text("Congratulations!\n YOU WIN", width/2, height/2)
-        noLoop()  # stop the draw loop
+        noLoop()
 
 # ---------------- Grid ----------------
 def drawGrid():
@@ -85,18 +76,11 @@ def drawGrid():
     gridSize = gridSide - 2 * space
     cellSize = gridSize / 9.0
 
-    # Vertical lines
     i = 0
     while i <= 9:
         strokeWeight(3 if i % 3 == 0 else 1)
         x = space + i * cellSize
         line(x, space, x, gridSide - space)
-        i += 1
-
-    # Horizontal lines
-    i = 0
-    while i <= 9:
-        strokeWeight(3 if i % 3 == 0 else 1)
         y = space + i * cellSize
         line(space, y, gridSide - space, y)
         i += 1
@@ -156,19 +140,19 @@ def highlightRelatedCells():
         fill(200, 220, 255)
         noStroke()
 
-        # Row
+        #Row
         col = 0
         while col < 9:
             rect(space + col*cellSize, space + selectedRow*cellSize, cellSize, cellSize)
             col += 1
 
-        # Column
+        #Column
         row = 0
         while row < 9:
             rect(space + selectedCol*cellSize, space + row*cellSize, cellSize, cellSize)
             row += 1
 
-        # 3x3 block
+        #3x3 block
         startRow = (selectedRow // 3) * 3
         startCol = (selectedCol // 3) * 3
         r = 0
@@ -206,13 +190,13 @@ def mousePressed():
     gridSize = gridSide - 2*space
     cellSize = gridSize / 9.0
 
-    # Sudoku grid
+    #Sudoku grid
     if space <= mouseX <= gridSide-space and space <= mouseY <= gridSide-space:
         selectedCol = int((mouseX-space)/cellSize)
         selectedRow = int((mouseY-space)/cellSize)
         return
 
-    # Number boxes
+    #Number boxes
     gap = 5
     totalGapWidth = gap*(9-1)
     availableWidth = width - 2*gap - totalGapWidth
@@ -239,13 +223,11 @@ def isValid(row, col, number):
         if board[row][c] == str(number):
             return False
         c += 1
-    # Column
     r = 0
     while r < 9:
         if board[r][col] == str(number):
             return False
         r += 1
-    # Block
     startRow = (row//3)*3
     startCol = (col//3)*3
     r = 0
