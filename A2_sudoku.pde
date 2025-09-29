@@ -3,8 +3,8 @@ selectedCol = -1
 selectedNumber = -1
 gameWon = False
 
-board = [] #Sudoku numbers as strings
-fixed = [] #True if number is from the puzzle
+board = [] # Sudoku numbers as strings
+fixed = [] # True if number is from the puzzle
 
 # ---------------- Setup ----------------
 def setup():
@@ -27,12 +27,13 @@ def setup():
         if current_board:
             boards.append(current_board)
     except:
-        print("Could not load sudoku_boards.txt. Using fallback board.")
+        # fallback board if file not found
         boards = [["530070000","600195000","098000060","800060003","400803001","700020006","060000280","000419005","000080079"]]
 
     import random
     chosen = random.choice(boards)
 
+    # build board and fixed arrays
     board = []
     fixed = []
     for row_line in chosen:
@@ -47,10 +48,6 @@ def setup():
     stroke(0)
     textAlign(CENTER, CENTER)
     textSize(20)
-
-    print("Board loaded:")
-    for r in board:
-        print(r)
 
 # ---------------- Draw ----------------
 def draw():
@@ -140,19 +137,19 @@ def highlightRelatedCells():
         fill(200, 220, 255)
         noStroke()
 
-        #Row
+        # Row
         col = 0
         while col < 9:
             rect(space + col*cellSize, space + selectedRow*cellSize, cellSize, cellSize)
             col += 1
 
-        #Column
+        # Column
         row = 0
         while row < 9:
             rect(space + selectedCol*cellSize, space + row*cellSize, cellSize, cellSize)
             row += 1
 
-        #3x3 block
+        # 3x3 block
         startRow = (selectedRow // 3) * 3
         startCol = (selectedCol // 3) * 3
         r = 0
@@ -190,13 +187,13 @@ def mousePressed():
     gridSize = gridSide - 2*space
     cellSize = gridSize / 9.0
 
-    #Sudoku grid
+    # Sudoku grid
     if space <= mouseX <= gridSide-space and space <= mouseY <= gridSide-space:
         selectedCol = int((mouseX-space)/cellSize)
         selectedRow = int((mouseY-space)/cellSize)
         return
 
-    #Number boxes
+    # Number boxes
     gap = 5
     totalGapWidth = gap*(9-1)
     availableWidth = width - 2*gap - totalGapWidth
@@ -217,7 +214,6 @@ def mousePressed():
 
 # ---------------- Sudoku logic ----------------
 def isValid(row, col, number):
-    # Row
     c = 0
     while c < 9:
         if board[row][c] == str(number):
@@ -248,8 +244,6 @@ def placeNumber(row, col, number):
                 board[row][col] = str(number)
                 if checkWinSimple():
                     gameWon = True
-            else:
-                print("Invalid placement!")
 
 def checkWinSimple():
     row = 0
