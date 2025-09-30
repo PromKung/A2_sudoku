@@ -15,25 +15,38 @@ def setup():
     boards = []
     try:
         lines = loadStrings("sudoku_boards.txt")
+
         current_board = []
-        for line in lines:
-            line = line.strip()
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
             if line == "":
                 if current_board:
                     boards.append(current_board)
                     current_board = []
             else:
                 current_board.append(line)
+            i += 1
+
         if current_board:
             boards.append(current_board)
+
     except:
         # fallback board if file not found
-        boards = [["530070000","600195000","098000060","800060003","400803001","700020006","060000280","000419005","000080079"]]
+        boards = [["530070000",
+                   "600195000",
+                   "098000060",
+                   "800060003",
+                   "400803001",
+                   "700020006",
+                   "060000280",
+                   "000419005",
+                   "000080079"]]
+
 
     import random
     chosen = random.choice(boards)
 
-    # build board and fixed arrays
     board = []
     fixed = []
     for row_line in chosen:
