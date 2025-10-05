@@ -65,6 +65,7 @@ def drawNumbers():
     gridSide = 540
     gridSize = gridSide - 2 * space
     cellSize = gridSize / 9.0
+    inset = 1.5  # small inset to avoid overlapping grid lines
 
     row = 0
     while row < 9:
@@ -72,10 +73,23 @@ def drawNumbers():
         while col < 9:
             num = board[row][col]
             if num != '0':
-                fill(0) if fixed[row][col] else fill(70, 130, 255)
+                x = space + col*cellSize + inset
+                y = space + row*cellSize + inset
+                size = cellSize - 2*inset
+
+                if fixed[row][col]:
+                    fill(200)  # grey background
+                else:
+                    fill(255)  # white background
+
+                noStroke()
+                rect(x, y, size, size)
+
+                fill(0)  # black text
                 textSize(int(cellSize * 0.7))
                 text(num, space + col*cellSize + cellSize/2,
                           space + row*cellSize + cellSize/2)
+                
             col += 1
         row += 1
     noFill()
