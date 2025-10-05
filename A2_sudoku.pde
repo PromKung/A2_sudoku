@@ -96,7 +96,7 @@ def highlightCell():
 
 # ---------- Keypad (closer to grid, less bottom gap) ----------
 def drawKeypad():
-    padY = 560  # move closer to grid
+    padY = 560
     padSize = 60
     gap = 6
     totalWidth = 3 * padSize + 2 * gap
@@ -106,7 +106,8 @@ def drawKeypad():
     stroke(0)
     strokeWeight(2)
 
-    num = 1
+    # Calculator layout
+    nums = [[7,8,9],[4,5,6],[1,2,3]]
     r = 0
     while r < 3:
         c = 0
@@ -116,9 +117,8 @@ def drawKeypad():
             rect(x, y, padSize, padSize)
             fill(0)
             textSize(26)
-            text(str(num), x + padSize/2, y + padSize/2)
+            text(str(nums[r][c]), x + padSize/2, y + padSize/2)
             fill(255)
-            num += 1
             c += 1
         r += 1
 
@@ -149,8 +149,9 @@ def mousePressed():
     totalWidth = 3 * padSize + 2 * gap
     startX = (width - totalWidth) / 2
 
+    # Calculator layout for clicks
+    nums = [[7,8,9],[4,5,6],[1,2,3]]
     r = 0
-    num = 1
     while r < 3:
         c = 0
         while c < 3:
@@ -158,8 +159,7 @@ def mousePressed():
             y = padY + r * (padSize + gap)
             if x <= mouseX <= x + padSize and y <= mouseY <= y + padSize:
                 if selectedRow != -1 and selectedCol != -1:
-                    board[selectedRow][selectedCol] = str(num)
-            num += 1
+                    board[selectedRow][selectedCol] = str(nums[r][c])
             c += 1
         r += 1
 
