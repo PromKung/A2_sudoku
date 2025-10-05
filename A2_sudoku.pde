@@ -40,7 +40,6 @@ def setup():
 
 def draw():
     background(255)
-    highlightRelatedCells()
     highlightCell()
     drawGrid()
     drawNumbers()
@@ -81,39 +80,6 @@ def drawNumbers():
         row += 1
     noFill()
     textSize(20)
-
-def highlightRelatedCells():
-    if selectedRow != -1 and selectedCol != -1:
-        space = 5
-        gridSide = 540
-        gridSize = gridSide - 2*space
-        cellSize = gridSize / 9.0
-
-        fill(220, 230, 255)
-        noStroke()
-
-        col = 0
-        while col < 9:
-            rect(space + col*cellSize, space + selectedRow*cellSize, cellSize, cellSize)
-            col += 1
-
-        row = 0
-        while row < 9:
-            rect(space + selectedCol*cellSize, space + row*cellSize, cellSize, cellSize)
-            row += 1
-
-        startRow = (selectedRow // 3) * 3
-        startCol = (selectedCol // 3) * 3
-        r = 0
-        while r < 3:
-            c = 0
-            while c < 3:
-                rect(space + (startCol+c)*cellSize, space + (startRow+r)*cellSize, cellSize, cellSize)
-                c += 1
-            r += 1
-
-        noFill()
-        stroke(0)
 
 def highlightCell():
     if selectedRow != -1 and selectedCol != -1:
