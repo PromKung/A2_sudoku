@@ -6,7 +6,7 @@ gameWon = False
 board = []          # Current state of the board ('1'-'9' or '0')
 fixed = []          # Boolean array: True if the number is part of the initial puzzle
 
-# --- Layout Constants for 540x850 Screen ---
+# --- Layout Constants for 540x900 Screen ---
 GRID_SHIFT_DOWN = 40 # Space created at the top for the status text
 GRID_TOP_LEFT_X = 5
 GRID_TOP_LEFT_Y = 5 + GRID_SHIFT_DOWN # Grid starts lower
@@ -17,13 +17,13 @@ GRID_DRAW_END_X = GRID_SIDE - GRID_TOP_LEFT_X # 535
 KEYPAD_TOP_Y = 560 + GRID_SHIFT_DOWN # Keypad also shifts down
 KEYPAD_SIZE = 60
 KEYPAD_GAP = 6
-KEYPAD_START_X = 25 
+KEYPAD_START_X = 25 # Start X for keypad changed by user
 # ---------------------------------------------
 
 def setup():
     global board, fixed
     
-    size(540, 900) 
+    size(540, 900) # Updated canvas size
     background(255)
     
     # ---- Try reading from file ----
@@ -99,7 +99,8 @@ def draw():
     textAlign(LEFT)
     if selectedNumber > 0:
         fill(0, 100, 200)
-        text("Selected: " + str(selectedNumber), KEYPAD_START_X, KEYPAD_TOP_Y - 5)
+        # Using the corrected vertical offset for "Selected" text
+        text("Selected: " + str(selectedNumber), KEYPAD_START_X, KEYPAD_TOP_Y - 5) 
     elif selectedNumber == 0:
         fill(200, 0, 0)
         text("Mode: DELETE/ERASE", KEYPAD_START_X, KEYPAD_TOP_Y - 5)
@@ -207,6 +208,7 @@ def drawKeypad():
     stroke(0)
     strokeWeight(2)
 
+    # nums is used to loop through the positions
     nums = [[7, 8, 9], [4, 5, 6], [1, 2, 3], [0, 0, 0]]
     
     r = 0
@@ -217,7 +219,7 @@ def drawKeypad():
             x = KEYPAD_START_X + c * (KEYPAD_SIZE + KEYPAD_GAP)
             y = KEYPAD_TOP_Y + r * (KEYPAD_SIZE + KEYPAD_GAP)
             
-            # Keypad buttons 1-9
+            # Keypad buttons 1-9 (first three rows)
             if r < 3:
                 # Highlight selected number
                 if selectedNumber == num_val:
@@ -230,8 +232,8 @@ def drawKeypad():
                 textSize(KEYPAD_SIZE * 0.5)
                 text(str(num_val), x + KEYPAD_SIZE / 2, y + KEYPAD_SIZE / 2)
             
-            # DEL button (in the center of the last row)
-            if r == 3 and c == 1:
+            # DEL button (now in the first position of the last row: r=3, c=0)
+            if r == 3 and c == 0: # <-- CHANGE HERE
                 if selectedNumber == 0:
                     fill(255, 180, 180, 200) # Lighter red if selected
                 else:
@@ -274,7 +276,8 @@ def mousePressed():
                 
                 if r < 3:
                     selectedNumber = num_val # Select 1-9
-                elif r == 3 and c == 1:
+                # DEL is now r=3, c=0
+                elif r == 3 and c == 0: # <-- CHANGE HERE
                     selectedNumber = 0 # Select DEL/Erase
                 else:
                     return
