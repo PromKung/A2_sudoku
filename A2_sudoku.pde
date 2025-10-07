@@ -112,10 +112,10 @@ def draw():
         text("YOU WON!", 10, 25)
     elif current_valid:
         fill(0, 180, 0)
-        text("Valid Board", 10, 25)
+        text("Good :)", 10, 25)
     else:
         fill(255, 0, 0)
-        text("Errors Present", 10, 25)
+        text("Not Good :(", 10, 25)
 
     textAlign(CENTER, CENTER)
 
@@ -225,7 +225,7 @@ def drawKeypad():
 
                 rect(x, y, KEYPAD_SIZE, KEYPAD_SIZE)
                 fill(0)
-                text("DEL", x + KEYPAD_SIZE / 2, y + KEYPAD_SIZE / 2)
+                text("X", x + KEYPAD_SIZE / 2, y + KEYPAD_SIZE / 2)
 
             c += 1
         r += 1
